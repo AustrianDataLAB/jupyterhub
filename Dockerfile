@@ -18,7 +18,7 @@ RUN apt-get update && apt-get upgrade -yq\
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/*
 
-RUN python3 -m pip install --upgrade setuptools pip wheel
+RUN python3 -m pip install --upgrade setuptools pip build wheel
 
 
 COPY . /src/jupyterhub/
