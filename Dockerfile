@@ -35,8 +35,9 @@ RUN n stable \
 WORKDIR /src/jupyterhub
 # Build client component packages ( will be copied into ./share and
 # packaged with the built wheel.)
-RUN python3 setup.py bdist_wheel \
-   && python3 -m pip wheel --wheel-dir /tmp/wheelhouse dist/*.whl
+
+RUN python3 -m build --wheel \
+   && python3 -m pip wheel --wheel-dir wheelhouse dist/*.whl
 
 
 FROM $BASE_IMAGE as base
