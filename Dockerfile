@@ -1,6 +1,28 @@
-ARG BUILDER_IMAGE=python:3.9-buster
-ARG BASE_IMAGE=jupyterhub/k8s-hub:2.0.0
-FROM $BUILDER_IMAGE AS builder
+# An incomplete base Docker image for running JupyterHub
+#
+# Add your configuration to create a complete derivative Docker image.
+#
+# Include your configuration settings by starting with one of two options:
+#
+# Option 1:
+#
+# FROM jupyterhub/jupyterhub:latest
+#
+# And put your configuration file jupyterhub_config.py in /srv/jupyterhub/jupyterhub_config.py.
+#
+# Option 2:
+#
+# Or you can create your jupyterhub config and database on the host machine, and mount it with:
+#
+# docker run -v $PWD:/srv/jupyterhub -t jupyterhub/jupyterhub
+#
+# NOTE
+# If you base on jupyterhub/jupyterhub-onbuild
+# your jupyterhub_config.py will be added automatically
+# from your docker directory.
+
+ARG BASE_IMAGE=ubuntu:22.04
+FROM $BASE_IMAGE AS builder
 
 USER root
 
@@ -24,7 +46,7 @@ RUN npm install --global yarn
 
 # copy everything except whats in .dockerignore, its a
 # compromise between needing to rebuild and maintaining
-# what needs to be part of the build.
+# what needs to be part of the build
 COPY . /src/jupyterhub/
 WORKDIR /src/jupyterhub
 
@@ -34,11 +56,11 @@ RUN python3 -m build --wheel
 RUN python3 -m pip wheel --wheel-dir wheelhouse dist/*.whl
 
 
-FROM $BASE_IMAGE as base
+FROM $BASE_IMAGE
 
 USER root
 
-
+ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
  && apt-get install -yq --no-install-recommends \
@@ -67,14 +89,8 @@ RUN npm install -g configurable-http-proxy@^4.2.0 \
  && rm -rf ~/.npm
 
 # install the wheels we built in the first stage
-
 COPY --from=builder /src/jupyterhub/wheelhouse /tmp/wheelhouse
-
-
-RUN python3 -m pip uninstall jupyterhub --yes \
-    && python3 -m pip install --no-cache /tmp/wheelhouse/* \
-    && python3 -m pip install ldap3 \
-    && python3 -m pip install kubernetes
+RUN python3 -m pip install --no-cache /tmp/wheelhouse/*
 
 RUN mkdir -p /srv/jupyterhub/
 WORKDIR /srv/jupyterhub/
