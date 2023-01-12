@@ -46,7 +46,7 @@ RUN npm install --global yarn
 
 # copy everything except whats in .dockerignore, its a
 # compromise between needing to rebuild and maintaining
-# what needs to be part of the build
+# what needs to be part of the build.
 COPY . /src/jupyterhub/
 WORKDIR /src/jupyterhub
 
