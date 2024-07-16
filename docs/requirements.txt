@@ -19,3 +19,4 @@ sphinx-copybutton
 sphinx-jsonschema
 sphinxext-opengraph
 sphinxext-rediraffe
+setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability
